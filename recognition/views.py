@@ -19,7 +19,13 @@ def labelize_picture_left_sides(request):
             formset.save()
             return redirect('left_labelizer')
     else:
-        pics = Picture.objects.filter(left_label__isnull=True).order_by('-created_at')[0:50]
+        # Prefere pictures with right label but without left label
+        pics = Picture.objects.filter(left_label__isnull=True, right_label__isnull=False)
+        if not pics.exists():
+            # But no pictures are missing just the left label then fetch all unlabeled ones
+            pics = Picture.objects.filter(left_label__isnull=True)
+
+        pics = pics.order_by('-created_at')[0:50]
         formset = form_set(queryset=pics)
     return render(request, 'labelizer.html', {
         'labelizer_side': 'left',
@@ -39,7 +45,13 @@ def labelize_picture_right_sides(request):
             formset.save()
             return redirect('right_labelizer')
     else:
-        pics = Picture.objects.filter(right_label__isnull=True).order_by('-created_at')[0:50]
+        # Prefere pictures with right label but without left label
+        pics = Picture.objects.filter(right_label__isnull=True, left_label__isnull=False)
+        if not pics.exists():
+            # But no pictures are missing just the left label then fetch all unlabeled ones
+            pics = Picture.objects.filter(right_label__isnull=True)
+
+        pics = pics.order_by('-created_at')[0:50]
         formset = form_set(queryset=pics)
     return render(request, 'labelizer.html', {
         'labelizer_side': 'right',
